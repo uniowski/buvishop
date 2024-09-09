@@ -23,8 +23,6 @@ function App() {
 
   const [showWelocomeScreen, setWelocomeScreen] = useState("");
   useEffect(() => {
-    console.log(uid);
-
     if (uid) {
       const ttload = async () => {
         try {
@@ -89,6 +87,7 @@ function App() {
     setUid(null);
   }
 
+
   return (
     <BrowserRouter>
       <Routes>
@@ -105,7 +104,10 @@ function App() {
           ></Route>
           <Route path="dodaj" element={<AddShoe />}></Route>
           <Route path="kontakt" element={<Contact />}></Route>
-          <Route path="koszyk" element={<Cart uid={uid} currentUserRank={currentUserRank}/>}></Route>
+          <Route
+            path="koszyk"
+            element={<Cart uid={uid} currentUserRank={currentUserRank} />}
+          ></Route>
           <Route
             path="zaloguj"
             element={

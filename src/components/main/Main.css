@@ -1,7 +1,31 @@
-.main-container{
-    background: linear-gradient(45deg, #30f100, #c57600);
-    margin: 2rem;
+.main-container {
+    background: linear-gradient(45deg, #00ec62, #ca7900);
+    margin: auto;
     padding: 2rem;
     border-radius: 3rem;
-    float: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.color-image-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.color-image {
+    max-width: 90%;
+    height: auto;
+}
+
+.main-container {
+    text-align: center;
+}
+
+/* Styl dla urządzeń mobilnych */
+@media (max-width: 768px) {
+    .main-container {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
 }
