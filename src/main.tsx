@@ -1,22 +1,22 @@
-import { StrictMode } from 'react'
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from "react"
+import ReactDOM from "react-dom/client"
 import {
   Outlet,
   RouterProvider,
   createRootRoute,
   createRoute,
   createRouter,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { ThemeProvider } from 'next-themes'
+} from "@tanstack/react-router"
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { ThemeProvider } from "next-themes"
 
-import './styles.css'
-import reportWebVitals from './reportWebVitals.ts'
+import "./styles.css"
+import reportWebVitals from "./reportWebVitals.ts"
 
-import Header from './components/Header.tsx'
-import Home from './pages/Home.tsx'
-import Shop from './pages/Offer.tsx'
-import Login from './pages/Login.tsx'
+import Header from "./components/Header.tsx"
+import Home from "./pages/Home.tsx"
+import Shop from "./pages/Offer.tsx"
+import Login from "./pages/Login.tsx"
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -30,19 +30,19 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: "/",
   component: Home,
 })
 
 const shopRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/offer',
+  path: "/shop",
   component: Shop,
 })
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/login',
+  path: "/login",
   component: Login,
 })
 
@@ -51,19 +51,19 @@ const routeTree = rootRoute.addChildren([indexRoute, shopRoute, loginRoute])
 const router = createRouter({
   routeTree,
   context: {},
-  defaultPreload: 'intent',
+  defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
 })
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router
   }
 }
 
-const rootElement = document.getElementById('app')
+const rootElement = document.getElementById("app")
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(

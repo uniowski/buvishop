@@ -26,7 +26,7 @@ export default function Header() {
                 Home
               </Link>
               <Link
-                to="/offer"
+                to="/shop"
                 className="text-gray-700 dark:text-gray-300 hover:text-slate-600 dark:hover:text-slate-300 transition-colors font-medium"
                 activeProps={{
                   className: "text-slate-900 dark:text-white font-bold",
@@ -44,9 +44,6 @@ export default function Header() {
               <Button variant="outline" className="hidden sm:inline-flex">
                 Sign In
               </Button>
-            </Link>
-            <Link to="/offer">
-              <Button className="hidden sm:inline-flex">Shop Now</Button>
             </Link>
             <ThemeToggle />
 

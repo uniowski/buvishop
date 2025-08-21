@@ -1,72 +1,67 @@
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select"
+import Footer from "@/components/shared/Footer"
 
 export default function Shop() {
-  const categories = ['All', 'Sneakers', 'Running', 'Formal', 'Casual', 'Boots']
+  const categories = ["All", "Sneakers", "Running", "Formal", "Casual", "Boots"]
 
   const shoes = [
     {
       id: 1,
-      name: 'Air Max Sneakers',
-      price: '$120',
-      originalPrice: '$150',
-      image: '👟',
-      category: 'Sneakers',
+      name: "Air Max Sneakers",
+      price: "$120",
+      originalPrice: "$150",
+      image: "👟",
+      category: "Sneakers",
       popular: true,
     },
     {
       id: 2,
-      name: 'Professional Runner',
-      price: '$180',
-      image: '🏃‍♂️',
-      category: 'Running',
+      name: "Professional Runner",
+      price: "$180",
+      image: "🏃‍♂️",
+      category: "Running",
       popular: false,
     },
     {
       id: 3,
-      name: 'Classic Oxford',
-      price: '$220',
-      image: '👔',
-      category: 'Formal',
+      name: "Classic Oxford",
+      price: "$220",
+      image: "👔",
+      category: "Formal",
       popular: false,
     },
     {
       id: 4,
-      name: 'Casual Loafers',
-      price: '$95',
-      originalPrice: '$120',
-      image: '👞',
-      category: 'Casual',
+      name: "Casual Loafers",
+      price: "$95",
+      originalPrice: "$120",
+      image: "👞",
+      category: "Casual",
       popular: false,
     },
     {
       id: 5,
-      name: 'Sport Trainers',
-      price: '$140',
-      image: '🏋️‍♂️',
-      category: 'Sneakers',
+      name: "Sport Trainers",
+      price: "$140",
+      image: "🏋️‍♂️",
+      category: "Sneakers",
       popular: true,
     },
     {
       id: 6,
-      name: 'Winter Boots',
-      price: '$200',
-      image: '🥾',
-      category: 'Boots',
+      name: "Winter Boots",
+      price: "$200",
+      image: "🥾",
+      category: "Boots",
       popular: false,
     },
   ]
@@ -76,9 +71,7 @@ export default function Shop() {
       {/* Header Section */}
       <section className="pt-20 pb-8 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Shop All Shoes
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Offer</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
             Discover our complete collection of premium footwear
           </p>
@@ -89,7 +82,7 @@ export default function Shop() {
               {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={category === 'All' ? 'default' : 'outline'}
+                  variant={category === "All" ? "default" : "outline"}
                   size="sm"
                 >
                   {category}
@@ -122,9 +115,7 @@ export default function Shop() {
               >
                 <CardHeader className="text-center relative">
                   {shoe.popular && (
-                    <Badge className="absolute top-2 left-2 bg-red-500">
-                      Popular
-                    </Badge>
+                    <Badge className="absolute top-2 left-2 bg-red-500">Popular</Badge>
                   )}
                   <div className="text-8xl mb-4 group-hover:scale-110 transition-transform">
                     {shoe.image}
@@ -155,26 +146,7 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 px-4 bg-slate-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Get Exclusive Deals</h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Subscribe to our newsletter and be the first to know about sales and
-            new arrivals.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-2 rounded-md text-slate-900"
-            />
-            <Button className="bg-white text-slate-900 hover:bg-gray-100">
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   )
 }
