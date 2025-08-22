@@ -1,6 +1,5 @@
+import { useLoaderData } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -9,66 +8,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import Footer from "@/components/shared/Footer"
+import ShoeCard from "@/components/shared/ShoeCard"
 
 export default function Shop() {
+  const { shoes } = useLoaderData({ from: "/shop" })
   const categories = ["All", "Sneakers", "Running", "Formal", "Casual", "Boots"]
-
-  const shoes = [
-    {
-      id: 1,
-      name: "Air Max Sneakers",
-      price: "$120",
-      originalPrice: "$150",
-      image: "👟",
-      category: "Sneakers",
-      popular: true,
-    },
-    {
-      id: 2,
-      name: "Professional Runner",
-      price: "$180",
-      image: "🏃‍♂️",
-      category: "Running",
-      popular: false,
-    },
-    {
-      id: 3,
-      name: "Classic Oxford",
-      price: "$220",
-      image: "👔",
-      category: "Formal",
-      popular: false,
-    },
-    {
-      id: 4,
-      name: "Casual Loafers",
-      price: "$95",
-      originalPrice: "$120",
-      image: "👞",
-      category: "Casual",
-      popular: false,
-    },
-    {
-      id: 5,
-      name: "Sport Trainers",
-      price: "$140",
-      image: "🏋️‍♂️",
-      category: "Sneakers",
-      popular: true,
-    },
-    {
-      id: 6,
-      name: "Winter Boots",
-      price: "$200",
-      image: "🥾",
-      category: "Boots",
-      popular: false,
-    },
-  ]
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      {/* Header Section */}
       <section className="pt-20 pb-8 px-4 bg-white dark:bg-slate-800">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Offer</h1>
@@ -109,38 +56,7 @@ export default function Shop() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {shoes.map((shoe) => (
-              <Card
-                key={shoe.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer group"
-              >
-                <CardHeader className="text-center relative">
-                  {shoe.popular && (
-                    <Badge className="absolute top-2 left-2 bg-red-500">Popular</Badge>
-                  )}
-                  <div className="text-8xl mb-4 group-hover:scale-110 transition-transform">
-                    {shoe.image}
-                  </div>
-                  <CardTitle className="text-lg">{shoe.name}</CardTitle>
-                  <CardDescription className="text-sm text-gray-500">
-                    {shoe.category}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {shoe.price}
-                    </span>
-                    {shoe.originalPrice && (
-                      <span className="text-lg text-gray-500 line-through">
-                        {shoe.originalPrice}
-                      </span>
-                    )}
-                  </div>
-                  <Button className="w-full group-hover:bg-gray-900 transition-colors">
-                    Add to Cart
-                  </Button>
-                </CardContent>
-              </Card>
+              <ShoeCard key={shoe.id} shoe={shoe} />
             ))}
           </div>
         </div>

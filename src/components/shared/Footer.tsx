@@ -1,5 +1,6 @@
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import GMap from "./GMap"
 
 export default function Footer() {
   return (
@@ -35,12 +36,14 @@ export default function Footer() {
             </div>
 
             {/* Simple Map Placeholder */}
-            <div className="bg-gray-700 dark:bg-gray-800 rounded-lg p-6 h-32 flex items-center justify-center">
+            {/* <div className="bg-gray-700 dark:bg-gray-800 rounded-lg p-6 h-32 flex items-center justify-center">
               <div className="text-center">
                 <span className="text-4xl mb-2 block">🗺️</span>
                 <span className="text-gray-400 text-sm">Interactive Map</span>
+                
               </div>
-            </div>
+            </div> */}
+            <GMap />
           </div>
         </div>
 

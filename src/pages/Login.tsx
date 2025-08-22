@@ -1,10 +1,11 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@firebase/auth"
+import { doc, setDoc } from "@firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Form,
@@ -14,18 +15,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { auth, db } from "@/firebase/firebaseConfig"
+import { PasswordInput } from "@/components/ui/password"
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: z.email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  rememberMe: z.boolean(),
 })
 
 const signupSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     surname: z.string().min(2, "Surname must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
+    email: z.email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(8, "Please confirm your password"),
   })
@@ -43,7 +45,6 @@ export default function Login() {
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
     },
   })
 
@@ -58,14 +59,37 @@ export default function Login() {
     },
   })
 
-  const onLoginSubmit = (values: LoginFormValues) => {
+  const onLoginSubmit = async (values: LoginFormValues) => {
     console.log("Login:", values)
-    // Handle login logic here
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password)
+    } catch (error) {
+      console.error("Error logging in:", error)
+    }
   }
 
-  const onSignupSubmit = (values: SignupFormValues) => {
+  const onSignupSubmit = async (values: SignupFormValues) => {
     console.log("Signup:", values)
-    // Handle signup logic here
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password,
+      )
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        name: values.name,
+        surname: values.surname,
+        email: values.email,
+        rank: "user",
+      })
+    } catch (error) {
+      console.error("Error signing up:", error)
+    }
+  }
+
+  const handleForgotPassword = () => {
+    console.log("Forgot password")
+    // Handle forgot password logic here
   }
 
   return (
@@ -116,23 +140,9 @@ export default function Login() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Enter your password" {...field} />
+                            <PasswordInput placeholder="Enter your password" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="rememberMe"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-sm font-medium">Remember me</FormLabel>
-                          </div>
                         </FormItem>
                       )}
                     />
@@ -143,7 +153,7 @@ export default function Login() {
                 </Form>
 
                 <div className="text-center">
-                  <Button variant="link" className="text-sm">
+                  <Button variant="link" className="text-sm" onClick={handleForgotPassword}>
                     Forgot your password?
                   </Button>
                 </div>
@@ -198,7 +208,7 @@ export default function Login() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Create a password" {...field} />
+                            <PasswordInput placeholder="Create a password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -211,7 +221,7 @@ export default function Login() {
                         <FormItem>
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Confirm your password" {...field} />
+                            <PasswordInput placeholder="Confirm your password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -1,5 +1,6 @@
+import { useLoaderData } from "@tanstack/react-router"
 import Autoplay from "embla-carousel-autoplay"
-import type { Shoe } from "@/types/shoes"
+import type { Shoe } from "@/types/shoe"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -14,27 +15,38 @@ import {
 import ShoeCard from "@/components/shared/ShoeCard"
 
 export default function Home() {
+  const { shoes } = useLoaderData({ from: "/" })
+  console.log(shoes)
   const featuredShoes: Array<Shoe> = [
     {
-      id: 1,
-      name: "Classic Sneakers",
-      price: "$89",
-      image: "👟",
-      description: "Comfortable everyday sneakers",
+      id: "5zH7flI2JW2k0tHdFxAs",
+      size: [39, 41, 42, 43, 44],
+      brand: "Adidas",
+      price: 299.99,
+      imageLink:
+        "https://firebasestorage.googleapis.com/v0/b/buvi-db.appspot.com/o/shoes%2Fimg%20(10).png?alt=media&token=f4d66507-8af4-4311-9a20-6af5dfc99477",
+      fabric: "skóra syntetyczna",
+      model: "Superstar",
     },
     {
-      id: 2,
-      name: "Running Shoes",
-      price: "$129",
-      image: "🏃‍♂️",
-      description: "High-performance athletic shoes",
+      id: "2sM2wDyr5Gn1funLAmBH",
+      fabric: "tkanina",
+      imageLink:
+        "https://firebasestorage.googleapis.com/v0/b/buvi-db.appspot.com/o/shoes%2Fimg%20(20).png?alt=media&token=d315c15d-b556-4622-92da-cefb6e5c45d8",
+      model: "Authentic",
+      price: 79.99,
+      size: [38, 39, 40, 41, 42],
+      brand: "Vans",
     },
     {
-      id: 3,
-      name: "Formal Shoes",
-      price: "$199",
-      image: "👔",
-      description: "Elegant dress shoes for special occasions",
+      id: "E9jmvYF069ItS6rwXoR2",
+      price: 599.0,
+      fabric: "Skóra ekologiczna",
+      model: "Jordan Color",
+      imageLink:
+        "https://firebasestorage.googleapis.com/v0/b/buvi-db.appspot.com/o/shoes%2FGraphic_Design_shoe_2.jpg?alt=media&token=a6db0ec7-81cc-47f3-93f6-4453acecc30c",
+      brand: "Nike",
+      size: [41, 42],
     },
   ]
 
@@ -115,11 +127,11 @@ export default function Home() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Featured Shoes
+            Special Offer
           </h2>
           <div className="flex flex-wrap gap-8 justify-center">
             {featuredShoes.map((shoe) => (
-              <div className="flex-1 min-w-[300px] max-w-[400px]">
+              <div key={shoe.id} className="flex-1 min-w-[300px] max-w-[400px]">
                 <ShoeCard key={shoe.id} shoe={shoe} />
               </div>
             ))}

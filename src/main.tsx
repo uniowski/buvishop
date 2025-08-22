@@ -9,14 +9,17 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { ThemeProvider } from "next-themes"
+import { collection, getDocs } from "firebase/firestore"
 
 import "./styles.css"
 import reportWebVitals from "./reportWebVitals.ts"
 
-import Header from "./components/Header.tsx"
+import Header from "./components/header/Header.tsx"
 import Home from "./pages/Home.tsx"
 import Shop from "./pages/Offer.tsx"
 import Login from "./pages/Login.tsx"
+import { db } from "./firebase/firebaseConfig.ts"
+import type { Shoe } from "./types/shoe.ts"
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -32,12 +35,30 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: Home,
+  loader: async () => {
+    const shoesCollection = collection(db, "shoes")
+    const shoesSnapshot = await getDocs(shoesCollection)
+    const shoesData = shoesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    return { shoes: shoesData }
+  },
 })
 
 const shopRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/shop",
   component: Shop,
+  loader: async (): Promise<{ shoes: Array<Shoe> }> => {
+    const shoesCollection = collection(db, "shoes")
+    const shoesSnapshot = await getDocs(shoesCollection)
+    const shoesData = shoesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    return { shoes: shoesData as Array<Shoe> }
+  },
 })
 
 const loginRoute = createRoute({
