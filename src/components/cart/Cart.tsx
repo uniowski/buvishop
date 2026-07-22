@@ -1,9 +1,14 @@
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import "./Cart.css";
 import CartItem from "../cart-item/CartItem";
 import { firestore } from "../../firebaseConfig";
 import { getDocs, collection } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+
+type DeliveryFormValues = {
+  delivery: number;
+};
 
 type CartProps = {
   uid: string | null;
@@ -36,7 +41,10 @@ type CartViewItem = {
 function Cart({ uid, currentUserRank }: CartProps) {
   const [priceSum, setPriceSum] = useState(0);
   const [dataToShow, setDataToShow] = useState<CartViewItem[] | undefined>();
-  const [cenaDostawy, setCenaDostawy] = useState(9.9);
+  const { register, watch } = useForm<DeliveryFormValues>({
+    defaultValues: { delivery: 9.9 },
+  });
+  const cenaDostawy = watch("delivery");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,10 +125,6 @@ function Cart({ uid, currentUserRank }: CartProps) {
     setPriceSum(sum);
   }
 
-  function changecenaDostawy(event: ChangeEvent<HTMLSelectElement>) {
-    setCenaDostawy(parseFloat(event.target.value));
-  }
-
   return (
     <div className="cart-container">
       <div className="koszyk-container">
@@ -154,8 +158,7 @@ function Cart({ uid, currentUserRank }: CartProps) {
             id="dostawa"
             name="dostawa"
             className="form-select"
-            onChange={changecenaDostawy}
-            value={cenaDostawy}
+            {...register("delivery", { valueAsNumber: true })}
           >
             <option value={9.9}>InPost Paczkomat - 9.90 PLN</option>
             <option value={14.9}>InPost Wysyłka - 15.90 PLN</option>

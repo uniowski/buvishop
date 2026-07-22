@@ -6,7 +6,22 @@ import {
 } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 import { auth, firestore } from "../../firebaseConfig";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useForm } from "react-hook-form";
+
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
+
+type RegisterFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  rank: "Klient" | "Administrator";
+  accessCodeInput: string;
+};
 
 type LoginPageProps = {
   accessCode: string;
@@ -27,26 +42,47 @@ function LoginPage({
   currentEmail,
   setCurrentEmail,
 }: LoginPageProps) {
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [rank, setRank] = useState("Klient");
-  const [accessCodeInput, setAccessCodeInput] = useState("");
-  const [askForVerify, setAskForVerify] = useState<ReactNode>("");
   const [resetPasswordButton, setResetPasswordButton] =
     useState("Zresetuj hasło");
   const [registerForm, setRegisterForm] = useState(true);
 
-  const loginToAccount = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const {
+    register: registerLoginField,
+    handleSubmit: handleLoginSubmit,
+    watch: watchLogin,
+    setValue: setLoginValue,
+  } = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const {
+    register: registerRegisterField,
+    handleSubmit: handleRegisterSubmit,
+    watch: watchRegister,
+    reset: resetRegisterForm,
+    setValue: setRegisterValue,
+  } = useForm<RegisterFormValues>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      rank: "Klient",
+      accessCodeInput: "",
+    },
+  });
+
+  const selectedRank = watchRegister("rank");
+
+  const loginToAccount = async (data: LoginFormValues) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        loginEmail,
-        loginPassword
+        data.email,
+        data.password
       );
       const user = userCredential.user;
       onSetUid(user.uid);
@@ -58,12 +94,11 @@ function LoginPage({
     }
   };
 
-  const registerNewAccount = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (rank === "Administrator" && accessCodeInput !== accessCode) {
+  const registerNewAccount = async (data: RegisterFormValues) => {
+    if (data.rank === "Administrator" && data.accessCodeInput !== accessCode) {
       alert("Błędny kod dostępu");
-      setRank("Klient");
-      setAskForVerify("");
+      setRegisterValue("rank", "Klient");
+      setRegisterValue("accessCodeInput", "");
       return;
     }
 
@@ -76,13 +111,12 @@ function LoginPage({
       const user = userCredential.user;
 
       await setDoc(doc(firestore, "users", user.uid), {
-        email: registerEmail,
-        firstName,
-        lastName,
-        rank,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        rank: data.rank,
       });
 
-      setAskForVerify("");
       window.scroll({
         top: 0,
         behavior: "smooth",
@@ -94,40 +128,16 @@ function LoginPage({
       alert(errorMessage);
     }
 
-    setRegisterEmail("");
-    setRegisterPassword("");
-    setFirstName("");
-    setLastName("");
-    setRank("Klient");
-    setAccessCodeInput("");
-    setAskForVerify("");
+    resetRegisterForm();
   };
 
   useEffect(() => {
-    if (rank === "Administrator") {
+    if (selectedRank === "Administrator") {
       alert(
         "Kod dostępu może być wysłany na pocztę pracowniczą:\n" + accessCode
       );
-      setAskForVerify(
-        <div className="form-group col-6">
-          <label htmlFor="accessCodeInput">Kod dostępu</label>
-          <input
-            type="number"
-            id="accessCodeInput"
-            className="form-control"
-            placeholder="****"
-            pattern="[0-9]{4}"
-            min={1000}
-            max={9999}
-            value={accessCodeInput}
-            onChange={(e) => setAccessCodeInput(e.target.value)}
-          />
-        </div>
-      );
-    } else {
-      setAskForVerify("");
     }
-  }, [rank]);
+  }, [selectedRank, accessCode]);
 
   const loginAsDemoAccount = (email: string, password: string) => {
     logoutHandle();
@@ -135,8 +145,8 @@ function LoginPage({
       top: 0,
       behavior: "smooth",
     });
-    setLoginEmail(email);
-    setLoginPassword(password);
+    setLoginValue("email", email);
+    setLoginValue("password", password);
   };
   const logoutHandle = () => {
     setCurrentEmail("");
@@ -144,6 +154,8 @@ function LoginPage({
   };
 
   const resetPassword = async () => {
+    const loginEmail = watchLogin("email") ?? "";
+
     if (loginEmail.includes("@") && loginEmail.includes(".")) {
       try {
         await sendPasswordResetEmail(auth, loginEmail);
@@ -173,7 +185,7 @@ function LoginPage({
             <h2>Zaloguj się do konta</h2>
             <form
               id="loginForm"
-              onSubmit={loginToAccount}
+              onSubmit={handleLoginSubmit(loginToAccount)}
               className="container"
             >
               <div className="row">
@@ -184,9 +196,7 @@ function LoginPage({
                     id="email"
                     className="form-control"
                     placeholder="adres@przyklad.pl"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    required
+                    {...registerLoginField("email", { required: true })}
                   />
                 </div>
                 <div className="form-group col-12">
@@ -196,9 +206,7 @@ function LoginPage({
                     id="password"
                     className="form-control"
                     placeholder="********"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    required
+                    {...registerLoginField("password", { required: true })}
                   />
                 </div>
               </div>
@@ -226,7 +234,7 @@ function LoginPage({
             <h2 className="mt-3">Nie masz konta? Zarejestruj się</h2>
             <form
               id="registerForm"
-              onSubmit={registerNewAccount}
+              onSubmit={handleRegisterSubmit(registerNewAccount)}
               className="container"
             >
               <div className="row">
@@ -237,9 +245,7 @@ function LoginPage({
                     id="imie"
                     className="form-control"
                     placeholder="Imię"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
+                    {...registerRegisterField("firstName", { required: true })}
                   />
                 </div>
                 <div className="form-group col-sm-12 col-md-6">
@@ -249,9 +255,7 @@ function LoginPage({
                     id="nazwisko"
                     className="form-control"
                     placeholder="Nazwisko"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
+                    {...registerRegisterField("lastName", { required: true })}
                   />
                 </div>
                 <div className="form-group col-sm-12 col-md-6">
@@ -261,9 +265,7 @@ function LoginPage({
                     id="emailRegistry"
                     className="form-control"
                     placeholder="adres@przyklad.pl"
-                    value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
-                    required
+                    {...registerRegisterField("email", { required: true })}
                   />
                 </div>
                 <div className="form-group col-sm-12 col-md-6">
@@ -273,9 +275,7 @@ function LoginPage({
                     id="passwordRegistry"
                     className="form-control"
                     placeholder="********"
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    required
+                    {...registerRegisterField("password", { required: true })}
                   />
                 </div>
                 <div className="form-group col-sm-12 col-md-6">
@@ -284,16 +284,29 @@ function LoginPage({
                   <select
                     id="selectranga"
                     className="form-select"
-                    value={rank}
-                    onChange={(e) => {
-                      setRank(e.target.value);
-                    }}
+                    {...registerRegisterField("rank")}
                   >
                     <option value="Klient">Klient</option>
                     <option value="Administrator">Administrator</option>
                   </select>
                 </div>
-                {askForVerify}
+                {selectedRank === "Administrator" ? (
+                  <div className="form-group col-6">
+                    <label htmlFor="accessCodeInput">Kod dostępu</label>
+                    <input
+                      type="number"
+                      id="accessCodeInput"
+                      className="form-control"
+                      placeholder="****"
+                      pattern="[0-9]{4}"
+                      min={1000}
+                      max={9999}
+                      {...registerRegisterField("accessCodeInput", {
+                        required: selectedRank === "Administrator",
+                      })}
+                    />
+                  </div>
+                ) : null}
               </div>
               <input
                 type="submit"

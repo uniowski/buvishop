@@ -2,25 +2,26 @@ import "./AddShoe.css";
 import { addDoc, collection } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { firestore } from "../../firebaseConfig";
-import type { FormEvent } from "react";
+import { useForm } from "react-hook-form";
+
+type AddShoeFormValues = {
+  shoeImage: FileList;
+  brand: string;
+  model: string;
+  fabric: string;
+  price: number;
+  size: string[];
+};
 
 function AddShoe() {
-  const addNewShoe = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const { register, handleSubmit, reset } = useForm<AddShoeFormValues>();
 
-    const form = event.currentTarget;
-
-    const checkedSizes = form.querySelectorAll<HTMLInputElement>(
-      'input[name="rozmiar"]:checked'
-    );
-    const availableSize = Array.from(checkedSizes)
-      .map((input) => Number(input.value))
+  const addNewShoe = async (data: AddShoeFormValues) => {
+    const availableSize = (data.size ?? [])
+      .map((size) => Number(size))
       .filter(Number.isFinite);
 
-    const shoeImageInput = form.elements.namedItem("shoeImage") as
-      | HTMLInputElement
-      | null;
-    const shoeImage = shoeImageInput?.files?.[0];
+    const shoeImage = data.shoeImage?.[0];
 
     if (!shoeImage) {
       alert("Wybierz zdjęcie produktu.");
@@ -28,18 +29,6 @@ function AddShoe() {
     }
 
     const storage = getStorage();
-    const brand =
-      (form.elements.namedItem("brand") as HTMLInputElement | null)?.value ??
-      "";
-    const model =
-      (form.elements.namedItem("model") as HTMLInputElement | null)?.value ??
-      "";
-    const fabric =
-      (form.elements.namedItem("fabric") as HTMLInputElement | null)?.value ??
-      "";
-    const price =
-      (form.elements.namedItem("price") as HTMLInputElement | null)?.value ??
-      "";
 
     try {
       const storageRef = ref(storage, `shoes/${shoeImage.name}`);
@@ -48,11 +37,11 @@ function AddShoe() {
 
       const colRef = collection(firestore, "shoes");
       const docRef = await addDoc(colRef, {
-        brand,
-        model,
+        brand: data.brand,
+        model: data.model,
         size: availableSize,
-        fabric,
-        price,
+        fabric: data.fabric,
+        price: data.price,
         imageLink: downloadURL,
       });
 
@@ -62,7 +51,7 @@ function AddShoe() {
       alert("Wystąpił błąd przy dodawaniu butów.");
     }
 
-    form.reset();
+    reset();
   };
 
   const allSizes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
@@ -74,8 +63,8 @@ function AddShoe() {
           className="form-check-input"
           type="checkbox"
           value={possibleSize}
-          name="rozmiar"
           id={`rozmiar${possibleSize}`}
+          {...register("size")}
         ></input>
         <label className="form-check-label" htmlFor={`rozmiar${possibleSize}`}>
           {possibleSize}
@@ -87,7 +76,11 @@ function AddShoe() {
   return (
     <div className="adding-shoe-container col-sm-12 col-md-8 col-lg-6 m-2">
       <h3>Dodaj ofertę buta</h3>
-      <form id="shoeAddForm" name="shoeAddForm" onSubmit={addNewShoe}>
+      <form
+        id="shoeAddForm"
+        name="shoeAddForm"
+        onSubmit={handleSubmit(addNewShoe)}
+      >
         <div className="form-group">
           <label htmlFor="formFile" className="form-label">
             Dodaj zdjęcie oferty
@@ -96,41 +89,37 @@ function AddShoe() {
             className="form-control"
             type="file"
             id="formFile"
-            name="shoeImage"
-            required
+            {...register("shoeImage", { required: true })}
           />
         </div>
         <div className="form-group">
           <label htmlFor="brand">Producent</label>
           <input
             type="text"
-            name="brand"
             id="brand"
             className="form-control"
             placeholder="Producent"
-            required
+            {...register("brand", { required: true })}
           ></input>
         </div>
         <div className="form-group">
           <label htmlFor="model">Model</label>
           <input
             type="text"
-            name="model"
             id="model"
             className="form-control"
             placeholder="Model"
-            required
+            {...register("model", { required: true })}
           ></input>
         </div>
         <div className="form-group">
           <label htmlFor="fabric">Materiał</label>
           <input
             type="text"
-            name="fabric"
             id="fabric"
             className="form-control"
             placeholder="Materiał"
-            required
+            {...register("fabric", { required: true })}
           ></input>
         </div>
         <div className="form-group">
@@ -138,12 +127,15 @@ function AddShoe() {
           <input
             type="number"
             step={0.01}
-            name="price"
             id="price"
             className="form-control"
             placeholder="Cena"
             pattern="[0-9]+([.,][0-9]+)?"
-            required
+            {...register("price", {
+              required: true,
+              valueAsNumber: true,
+              min: 0,
+            })}
           ></input>
         </div>
         <div className="form-group">
