@@ -4,19 +4,24 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const env = import.meta.env;
-const fromEnv = (viteKey, craKey) => env[viteKey] ?? env[craKey] ?? "";
+const requiredEnv = (key: keyof ImportMetaEnv) => {
+  const value = env[key];
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+
+  return value;
+};
 
 const firebaseConfig = {
-  apiKey: fromEnv("VITE_API_KEY", "REACT_APP_API_KEY"),
-  authDomain: fromEnv("VITE_AUTH_DOMAIN", "REACT_APP_AUTH_DOMAIN"),
-  projectId: fromEnv("VITE_PROJECT_ID", "REACT_APP_PROJECT_ID"),
-  storageBucket: fromEnv("VITE_STORAGE_BUCKET", "REACT_APP_STORAGE_BUCKET"),
-  messagingSenderId: fromEnv(
-    "VITE_MESSAGING_SENDER_ID",
-    "REACT_APP_MESSAGING_SENDER_ID"
-  ),
-  appId: fromEnv("VITE_APP_ID", "REACT_APP_APP_ID"),
-  measurementId: fromEnv("VITE_MEASUREMENT_ID", "REACT_APP_MEASUREMENT_ID"),
+  apiKey: requiredEnv("VITE_API_KEY"),
+  authDomain: requiredEnv("VITE_AUTH_DOMAIN"),
+  projectId: requiredEnv("VITE_PROJECT_ID"),
+  storageBucket: requiredEnv("VITE_STORAGE_BUCKET"),
+  messagingSenderId: requiredEnv("VITE_MESSAGING_SENDER_ID"),
+  appId: requiredEnv("VITE_APP_ID"),
+  measurementId: env.VITE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
