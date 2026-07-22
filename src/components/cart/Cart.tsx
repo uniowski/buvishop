@@ -1,13 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import "./Cart.css";
 import CartItem from "../cart-item/CartItem";
 import { firestore } from "../../firebaseConfig";
 import { getDocs, collection } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
-function Cart({ uid, currentUserRank }) {
+type CartProps = {
+  uid: string | null;
+  currentUserRank: string | null;
+};
+
+type Shoe = {
+  id: string;
+  brand: string;
+  model: string;
+  price: string;
+  imageLink: string;
+};
+
+type CartDocument = {
+  id: string;
+  shoeID: string;
+  shoeSize: number;
+};
+
+type CartViewItem = {
+  cartItemID: string;
+  brand: string;
+  model: string;
+  price: string;
+  imageLink: string;
+  shoeSize: number;
+};
+
+function Cart({ uid, currentUserRank }: CartProps) {
   const [priceSum, setPriceSum] = useState(0);
-  const [dataToShow, setDataToShow] = useState();
+  const [dataToShow, setDataToShow] = useState<CartViewItem[] | undefined>();
   const [cenaDostawy, setCenaDostawy] = useState(9.9);
   const navigate = useNavigate();
 
@@ -20,20 +48,40 @@ function Cart({ uid, currentUserRank }) {
   }, [uid]);
 
   async function fetchAndDisplayUsersCart() {
+    if (!uid) {
+      setDataToShow(undefined);
+      return;
+    }
+
     try {
       const shoesRef = collection(firestore, "shoes");
       const shoesSnapshot = await getDocs(shoesRef);
-      const shoesData = shoesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const shoesData: Shoe[] = shoesSnapshot.docs.map((docSnapshot) => {
+        const data = docSnapshot.data();
+
+        return {
+          id: docSnapshot.id,
+          brand: typeof data.brand === "string" ? data.brand : "",
+          model: typeof data.model === "string" ? data.model : "",
+          price:
+            typeof data.price === "string" || typeof data.price === "number"
+              ? String(data.price)
+              : "0",
+          imageLink: typeof data.imageLink === "string" ? data.imageLink : "",
+        };
+      });
 
       const usersCartRef = collection(firestore, "users", uid, "cart");
       const cartSnapshot = await getDocs(usersCartRef);
-      const cartData = cartSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const cartData: CartDocument[] = cartSnapshot.docs.map((docSnapshot) => {
+        const data = docSnapshot.data();
+
+        return {
+          id: docSnapshot.id,
+          shoeID: typeof data.shoeID === "string" ? data.shoeID : "",
+          shoeSize: Number(data.shoeSize),
+        };
+      });
 
       if (cartData.length > 0) {
         const data = cartData
@@ -58,20 +106,18 @@ function Cart({ uid, currentUserRank }) {
       }
     } catch (error) {
       console.error("Błąd przy pobieraniu dokumentów: ", error);
-      alert(
-        "Wystąpił błąd.\nSpróbuj ponownie lub skontaktuj się z obsługą klienta."
-      );
+      alert("Wystąpił błąd.\nSpróbuj ponownie lub skontaktuj się z obsługą klienta.");
     }
   }
 
-  function calculatePriceSum(data) {
+  function calculatePriceSum(data: CartViewItem[]) {
     const sum = data.reduce((total, item) => {
       return total + (parseFloat(item.price) || 0);
     }, 0);
-    setPriceSum(parseFloat(sum));
+    setPriceSum(sum);
   }
 
-  function changecenaDostawy(event) {
+  function changecenaDostawy(event: ChangeEvent<HTMLSelectElement>) {
     setCenaDostawy(parseFloat(event.target.value));
   }
 

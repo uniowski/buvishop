@@ -1,7 +1,7 @@
 import "./bootstrap.css";
 import "./App.css";
 // import "bootstrap/dist/css/bootstrap.min.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StoreOffer from "./components/store-offer/StroreOffer";
 import Layout from "./components/layout/Layout";
@@ -17,11 +17,12 @@ function App() {
   const accessCode = "1234";
 
   const [userStatus, setUserStatus] = useState("");
-  const [currentUserRank, setCurrentUserRank] = useState();
-  const [uid, setUid] = useState();
+  const [currentUserRank, setCurrentUserRank] = useState<string | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
   const [currentEmail, setCurrentEmail] = useState("");
 
-  const [showWelocomeScreen, setWelocomeScreen] = useState("");
+  const [showWelocomeScreen, setWelocomeScreen] =
+    useState<ReactNode>(undefined);
   useEffect(() => {
     if (uid) {
       const ttload = async () => {
@@ -65,17 +66,20 @@ function App() {
 
             const userSnap = await getDoc(doc(firestore, "users", uid));
             if (userSnap.exists()) {
-              setCurrentUserRank(userSnap.data().rank);
+              const userRank = userSnap.data().rank;
+              setCurrentUserRank(typeof userRank === "string" ? userRank : null);
             }
 
             setTimeout(() => {
-              setWelocomeScreen();
+              setWelocomeScreen(undefined);
             }, 2000);
           } else {
             console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error getting document:", error.message);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          console.error("Error getting document:", errorMessage);
         }
       };
 
@@ -86,7 +90,6 @@ function App() {
   function logout() {
     setUid(null);
   }
-
 
   return (
     <BrowserRouter>

@@ -3,7 +3,29 @@ import ButGuzikAdd from "../store-offer-item-size/ButGuzikAdd";
 import { deleteDoc, doc } from "firebase/firestore";
 import { firestore } from "../../firebaseConfig";
 
-function But({ shoeData, uid, currentUserRank, fetchAndDisplayAllDocuments }) {
+type ShoeData = {
+  id: string;
+  brand: string;
+  model: string;
+  size: number[];
+  fabric: string;
+  price: string;
+  imageLink: string;
+};
+
+type StoreItemProps = {
+  shoeData: ShoeData;
+  uid: string | null;
+  currentUserRank: string | null;
+  fetchAndDisplayAllDocuments: () => Promise<void>;
+};
+
+function But({
+  shoeData,
+  uid,
+  currentUserRank,
+  fetchAndDisplayAllDocuments,
+}: StoreItemProps) {
   const listaRozmiarow = shoeData.size.map((size, index) => {
     if (size != null) {
       return (
@@ -15,9 +37,14 @@ function But({ shoeData, uid, currentUserRank, fetchAndDisplayAllDocuments }) {
   });
 
   const deleteOffer = async () => {
-    window.confirm(
+    const isConfirmed = window.confirm(
       "Czy na pewno chcesz usunąć tą ofertę?\nTej operacji NIE MOŻNA cofnać."
     );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     await deleteDoc(doc(firestore, "shoes", shoeData.id));
     fetchAndDisplayAllDocuments();
   };

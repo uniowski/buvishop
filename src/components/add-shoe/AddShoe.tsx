@@ -2,21 +2,44 @@ import "./AddShoe.css";
 import { addDoc, collection } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { firestore } from "../../firebaseConfig";
+import type { FormEvent } from "react";
 
 function AddShoe() {
-  const addNewShoe = async (event) => {
+  const addNewShoe = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const sizesForm = document.shoeAddForm.rozmiar;
-    const availableSize = [];
-    sizesForm.forEach((sizeIsChecked) => {
-      if (sizeIsChecked.checked) {
-        availableSize.push(Number(sizeIsChecked.value));
-      }
-    });
+    const form = event.currentTarget;
+
+    const checkedSizes = form.querySelectorAll<HTMLInputElement>(
+      'input[name="rozmiar"]:checked'
+    );
+    const availableSize = Array.from(checkedSizes)
+      .map((input) => Number(input.value))
+      .filter(Number.isFinite);
+
+    const shoeImageInput = form.elements.namedItem("shoeImage") as
+      | HTMLInputElement
+      | null;
+    const shoeImage = shoeImageInput?.files?.[0];
+
+    if (!shoeImage) {
+      alert("Wybierz zdjęcie produktu.");
+      return;
+    }
 
     const storage = getStorage();
-    const shoeImage = document.shoeAddForm.shoeImage.files[0];
+    const brand =
+      (form.elements.namedItem("brand") as HTMLInputElement | null)?.value ??
+      "";
+    const model =
+      (form.elements.namedItem("model") as HTMLInputElement | null)?.value ??
+      "";
+    const fabric =
+      (form.elements.namedItem("fabric") as HTMLInputElement | null)?.value ??
+      "";
+    const price =
+      (form.elements.namedItem("price") as HTMLInputElement | null)?.value ??
+      "";
 
     try {
       const storageRef = ref(storage, `shoes/${shoeImage.name}`);
@@ -25,11 +48,11 @@ function AddShoe() {
 
       const colRef = collection(firestore, "shoes");
       const docRef = await addDoc(colRef, {
-        brand: document.shoeAddForm.brand.value,
-        model: document.shoeAddForm.model.value,
+        brand,
+        model,
         size: availableSize,
-        fabric: document.shoeAddForm.fabric.value,
-        price: document.shoeAddForm.price.value,
+        fabric,
+        price,
         imageLink: downloadURL,
       });
 
@@ -39,7 +62,7 @@ function AddShoe() {
       alert("Wystąpił błąd przy dodawaniu butów.");
     }
 
-    document.shoeAddForm.reset();
+    form.reset();
   };
 
   const allSizes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];

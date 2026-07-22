@@ -1,9 +1,14 @@
 import { Link, Outlet } from "react-router-dom";
 import "./Layout.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { FaTimes, FaBars } from "react-icons/fa";
 
-function Layout({ status, currentUserRank }) {
+type LayoutProps = {
+  status: string;
+  currentUserRank: string | null;
+};
+
+function Layout({ status, currentUserRank }: LayoutProps) {
   const [click, setClick] = useState(false);
   const handleClick = () => {
     setClick(!click);
@@ -11,7 +16,7 @@ function Layout({ status, currentUserRank }) {
   const closeMenu = () => {
     setClick(false);
   };
-  const [menu, setMenu] = useState(<></>);
+  const [menu, setMenu] = useState<ReactNode>(<></>);
 
   useEffect(() => {
     if (currentUserRank != null) {

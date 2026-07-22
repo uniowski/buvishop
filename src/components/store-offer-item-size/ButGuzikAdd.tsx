@@ -2,10 +2,20 @@ import "./ButGuzikAdd.css";
 import { firestore } from "../../firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 
-function ButGuzikAdd({ size, uid, shoeID }) {
+type ButGuzikAddProps = {
+  size: number;
+  uid: string | null;
+  shoeID: string;
+};
+
+function ButGuzikAdd({ size, uid, shoeID }: ButGuzikAddProps) {
   const add = async () => {
+    if (!uid) {
+      return;
+    }
+
     try {
-      const shoeRef = addDoc(collection(firestore, "users", uid, "cart"), {
+      await addDoc(collection(firestore, "users", uid, "cart"), {
         shoeID: shoeID,
         shoeSize: size,
       });
