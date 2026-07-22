@@ -1,6 +1,5 @@
 import "./CartItem.css";
-import { deleteDoc, doc } from "firebase/firestore";
-import { firestore } from "../../firebaseConfig";
+import { removeShoeFromCart } from "../../services/cartService";
 
 type CartItemProps = {
   id: string;
@@ -24,8 +23,12 @@ function KoszykItem({
   update,
 }: CartItemProps) {
   const deleteShoe = async () => {
+    if (!uid) {
+      return;
+    }
+
     try {
-      await deleteDoc(doc(firestore, "users", uid, "cart", id));
+      await removeShoeFromCart(uid, id);
       update();
     } catch (error) {
       console.log(error);

@@ -1,42 +1,26 @@
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import "./Cart.css";
 import CartItem from "../cart-item/CartItem";
-import { firestore } from "../../firebaseConfig";
-import { getDocs, collection } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { getUserCartItems, type CartViewItem } from "../../services/cartService";
+
+type DeliveryFormValues = {
+  delivery: number;
+};
 
 type CartProps = {
   uid: string | null;
   currentUserRank: string | null;
 };
 
-type Shoe = {
-  id: string;
-  brand: string;
-  model: string;
-  price: string;
-  imageLink: string;
-};
-
-type CartDocument = {
-  id: string;
-  shoeID: string;
-  shoeSize: number;
-};
-
-type CartViewItem = {
-  cartItemID: string;
-  brand: string;
-  model: string;
-  price: string;
-  imageLink: string;
-  shoeSize: number;
-};
-
 function Cart({ uid, currentUserRank }: CartProps) {
   const [priceSum, setPriceSum] = useState(0);
-  const [dataToShow, setDataToShow] = useState<CartViewItem[] | undefined>();
-  const [cenaDostawy, setCenaDostawy] = useState(9.9);
+  const [dataToShow, setDataToShow] = useState<CartViewItem[] | null>(null);
+  const { register, watch } = useForm<DeliveryFormValues>({
+    defaultValues: { delivery: 9.9 },
+  });
+  const cenaDostawy = watch("delivery");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,60 +33,18 @@ function Cart({ uid, currentUserRank }: CartProps) {
 
   async function fetchAndDisplayUsersCart() {
     if (!uid) {
-      setDataToShow(undefined);
+      setDataToShow(null);
       return;
     }
 
     try {
-      const shoesRef = collection(firestore, "shoes");
-      const shoesSnapshot = await getDocs(shoesRef);
-      const shoesData: Shoe[] = shoesSnapshot.docs.map((docSnapshot) => {
-        const data = docSnapshot.data();
-
-        return {
-          id: docSnapshot.id,
-          brand: typeof data.brand === "string" ? data.brand : "",
-          model: typeof data.model === "string" ? data.model : "",
-          price:
-            typeof data.price === "string" || typeof data.price === "number"
-              ? String(data.price)
-              : "0",
-          imageLink: typeof data.imageLink === "string" ? data.imageLink : "",
-        };
-      });
-
-      const usersCartRef = collection(firestore, "users", uid, "cart");
-      const cartSnapshot = await getDocs(usersCartRef);
-      const cartData: CartDocument[] = cartSnapshot.docs.map((docSnapshot) => {
-        const data = docSnapshot.data();
-
-        return {
-          id: docSnapshot.id,
-          shoeID: typeof data.shoeID === "string" ? data.shoeID : "",
-          shoeSize: Number(data.shoeSize),
-        };
-      });
+      const cartData = await getUserCartItems(uid);
 
       if (cartData.length > 0) {
-        const data = cartData
-          .map((cartItem) => {
-            const shoeDetails = shoesData.find(
-              (shoe) => shoe.id === cartItem.shoeID
-            );
-            return {
-              cartItemID: cartItem.id,
-              brand: shoeDetails?.brand || "Unknown",
-              model: shoeDetails?.model || "Unknown",
-              price: shoeDetails?.price || 0,
-              imageLink: shoeDetails?.imageLink || "",
-              shoeSize: cartItem.shoeSize,
-            };
-          })
-          .filter((item) => item.brand !== "Unknown");
-        setDataToShow(data);
-        calculatePriceSum(data);
+        setDataToShow(cartData);
+        calculatePriceSum(cartData);
       } else {
-        setDataToShow();
+        setDataToShow(null);
       }
     } catch (error) {
       console.error("Błąd przy pobieraniu dokumentów: ", error);
@@ -115,10 +57,6 @@ function Cart({ uid, currentUserRank }: CartProps) {
       return total + (parseFloat(item.price) || 0);
     }, 0);
     setPriceSum(sum);
-  }
-
-  function changecenaDostawy(event: ChangeEvent<HTMLSelectElement>) {
-    setCenaDostawy(parseFloat(event.target.value));
   }
 
   return (
@@ -152,10 +90,8 @@ function Cart({ uid, currentUserRank }: CartProps) {
           <h5>Dostawa: {cenaDostawy.toFixed(2)} PLN</h5>
           <select
             id="dostawa"
-            name="dostawa"
             className="form-select"
-            onChange={changecenaDostawy}
-            value={cenaDostawy}
+            {...register("delivery", { valueAsNumber: true })}
           >
             <option value={9.9}>InPost Paczkomat - 9.90 PLN</option>
             <option value={14.9}>InPost Wysyłka - 15.90 PLN</option>
