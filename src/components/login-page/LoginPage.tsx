@@ -6,7 +6,17 @@ import {
 } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 import { auth, firestore } from "../../firebaseConfig";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+
+type LoginPageProps = {
+  accessCode: string;
+  onSetUid: (uid: string | null) => void;
+  uid: string | null;
+  logout: () => void;
+  showWelocomeScreen: ReactNode;
+  currentEmail: string;
+  setCurrentEmail: (email: string) => void;
+};
 
 function LoginPage({
   accessCode,
@@ -16,7 +26,7 @@ function LoginPage({
   showWelocomeScreen,
   currentEmail,
   setCurrentEmail,
-}) {
+}: LoginPageProps) {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
@@ -24,13 +34,13 @@ function LoginPage({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [rank, setRank] = useState("Klient");
-  const [accessCodeInput, setAccessCodeInput] = useState();
-  const [askForVerify, setAskForVerify] = useState("");
+  const [accessCodeInput, setAccessCodeInput] = useState("");
+  const [askForVerify, setAskForVerify] = useState<ReactNode>("");
   const [resetPasswordButton, setResetPasswordButton] =
     useState("Zresetuj hasło");
   const [registerForm, setRegisterForm] = useState(true);
 
-  const loginToAccount = async (event) => {
+  const loginToAccount = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -42,12 +52,13 @@ function LoginPage({
       onSetUid(user.uid);
       setCurrentEmail(user.email);
     } catch (error) {
-      console.error("Błąd logowania:", error.message);
-      alert(error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Błąd logowania:", errorMessage);
+      alert(errorMessage);
     }
   };
 
-  const registerNewAccount = async (event) => {
+  const registerNewAccount = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (rank === "Administrator" && accessCodeInput !== accessCode) {
       alert("Błędny kod dostępu");
@@ -78,8 +89,9 @@ function LoginPage({
       });
       setRegisterForm(false);
     } catch (error) {
-      console.error("Błąd rejestracji:", error.message);
-      alert(error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Błąd rejestracji:", errorMessage);
+      alert(errorMessage);
     }
 
     setRegisterEmail("");
@@ -117,7 +129,7 @@ function LoginPage({
     }
   }, [rank]);
 
-  const loginAsDemoAccount = (email, password) => {
+  const loginAsDemoAccount = (email: string, password: string) => {
     logoutHandle();
     window.scroll({
       top: 0,
@@ -127,7 +139,7 @@ function LoginPage({
     setLoginPassword(password);
   };
   const logoutHandle = () => {
-    setCurrentEmail();
+    setCurrentEmail("");
     logout();
   };
 

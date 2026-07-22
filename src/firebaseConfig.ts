@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const env = import.meta.env;
-const fromEnv = (viteKey, craKey) => env[viteKey] ?? env[craKey];
+const fromEnv = (viteKey, craKey) => env[viteKey] ?? env[craKey] ?? "";
 
 const firebaseConfig = {
   apiKey: fromEnv("VITE_API_KEY", "REACT_APP_API_KEY"),

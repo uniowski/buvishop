@@ -1,7 +1,7 @@
 import "./Main.css";
 import { collection, getCountFromServer } from "firebase/firestore";
 import { firestore } from "../../firebaseConfig";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Main() {
   const [shoesCount, setShoesCount] = useState(0);
@@ -21,7 +21,9 @@ function Main() {
     }
   }
 
-  getTotalCount();
+  useEffect(() => {
+    getTotalCount();
+  }, []);
 
   return (
     <>

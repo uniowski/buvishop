@@ -1,9 +1,28 @@
 import "./CartItem.css";
-import { useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { firestore } from "../../firebaseConfig";
 
-function KoszykItem({ id, brand, model, imageLink, price, shoeSize, uid, update }) {
+type CartItemProps = {
+  id: string;
+  brand: string;
+  model: string;
+  imageLink: string;
+  price: string;
+  shoeSize: number;
+  uid: string | null;
+  update: () => Promise<void>;
+};
+
+function KoszykItem({
+  id,
+  brand,
+  model,
+  imageLink,
+  price,
+  shoeSize,
+  uid,
+  update,
+}: CartItemProps) {
   const deleteShoe = async () => {
     try {
       await deleteDoc(doc(firestore, "users", uid, "cart", id));
