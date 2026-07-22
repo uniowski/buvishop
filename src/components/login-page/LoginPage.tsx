@@ -23,22 +23,20 @@ type RegisterFormValues = {
 
 type LoginPageProps = {
   accessCode: string;
-  onSetUid: (uid: string | null) => void;
+  onLogin: (user: { uid: string; email: string }) => void;
   uid: string | null;
   logout: () => void;
   showWelocomeScreen: ReactNode;
   currentEmail: string;
-  setCurrentEmail: (email: string) => void;
 };
 
 function LoginPage({
   accessCode,
-  onSetUid,
+  onLogin,
   uid,
   logout,
   showWelocomeScreen,
   currentEmail,
-  setCurrentEmail,
 }: LoginPageProps) {
   const [resetPasswordButton, setResetPasswordButton] =
     useState("Zresetuj hasło");
@@ -78,8 +76,10 @@ function LoginPage({
   const loginToAccount = async (data: LoginFormValues) => {
     try {
       const user = await loginWithEmailAndPassword(data.email, data.password);
-      onSetUid(user.uid);
-      setCurrentEmail(user.email ?? "");
+      onLogin({
+        uid: user.uid,
+        email: user.email ?? "",
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Błąd logowania:", errorMessage);
@@ -136,7 +136,6 @@ function LoginPage({
     setLoginValue("password", password);
   };
   const logoutHandle = () => {
-    setCurrentEmail("");
     logout();
   };
 

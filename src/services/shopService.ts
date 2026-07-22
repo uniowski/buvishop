@@ -53,7 +53,11 @@ export type StoreStats = {
   usersCount: number;
 };
 
-export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+export async function getUserProfile(uid: string | null): Promise<UserProfile | null> {
+  if(!uid){
+    return null
+  }
+
   const userSnap = await getDoc(doc(firestore, "users", uid));
 
   if (!userSnap.exists()) {

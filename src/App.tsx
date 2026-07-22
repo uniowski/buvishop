@@ -9,7 +9,13 @@ import LoginPage from "./components/login-page/LoginPage";
 import Contact from "./components/contact/Contact";
 import Cart from "./components/cart/Cart";
 import AddShoe from "./components/add-shoe/AddShoe";
-import { getUserProfile } from "./services/shopService";
+import { getUserProfile, type UserProfile } from "./services/shopService";
+
+type SessionState = {
+  uid: string | null;
+  email: string;
+  profile: UserProfile | null;
+};
 
 function App() {
   const accessCode = import.meta.env.VITE_ADMIN_ACCESS_CODE;
@@ -18,26 +24,24 @@ function App() {
     throw new Error("Missing required environment variable: VITE_ADMIN_ACCESS_CODE");
   }
 
-  const [userStatus, setUserStatus] = useState("");
-  const [currentUserRank, setCurrentUserRank] = useState<string | null>(null);
-  const [uid, setUid] = useState<string | null>(null);
-  const [currentEmail, setCurrentEmail] = useState("");
+  const [session, setSession] = useState<SessionState>({
+    uid: null,
+    email: "",
+    profile: null,
+  });
 
   const [showWelocomeScreen, setWelocomeScreen] =
     useState<ReactNode>(undefined);
+
   useEffect(() => {
-    if (uid) {
+    if (session.uid) {
       const ttload = async () => {
         try {
-          const userProfile = await getUserProfile(uid);
+          const userProfile = await getUserProfile(session.uid);
 
           if (userProfile) {
             const welcomeSentence =
               "Witaj " + userProfile.firstName + " " + userProfile.lastName;
-
-            setUserStatus(
-              userProfile.rank + ": " + userProfile.firstName + " " + userProfile.lastName
-            );
             const letters = welcomeSentence
               .split(" ")
               .map((word) => word.split(""));
@@ -58,13 +62,20 @@ function App() {
               </div>
             );
 
-            setCurrentUserRank(userProfile.rank || null);
+            setSession((prevSession) => ({
+              ...prevSession,
+              profile: userProfile,
+            }));
 
             setTimeout(() => {
               setWelocomeScreen(undefined);
             }, 2000);
           } else {
             console.log("No such document!");
+            setSession((prevSession) => ({
+              ...prevSession,
+              profile: null,
+            }));
           }
         } catch (error) {
           const errorMessage =
@@ -75,10 +86,27 @@ function App() {
 
       ttload();
     }
-  }, [uid]);
+  }, [session.uid]);
+
+  const userStatus = session.profile
+    ? `${session.profile.rank}: ${session.profile.firstName} ${session.profile.lastName}`
+    : "";
+  const currentUserRank = session.profile?.rank || null;
 
   function logout() {
-    setUid(null);
+    setSession({
+      uid: null,
+      email: "",
+      profile: null,
+    });
+  }
+
+  function handleLogin(user: { uid: string; email: string }) {
+    setSession({
+      uid: user.uid,
+      email: user.email,
+      profile: null,
+    });
   }
 
   return (
@@ -93,13 +121,15 @@ function App() {
           <Route index element={<Main />}></Route>
           <Route
             path="oferta"
-            element={<StoreOffer uid={uid} currentUserRank={currentUserRank} />}
+            element={
+              <StoreOffer uid={session.uid} currentUserRank={currentUserRank} />
+            }
           ></Route>
           <Route path="dodaj" element={<AddShoe />}></Route>
           <Route path="kontakt" element={<Contact />}></Route>
           <Route
             path="koszyk"
-            element={<Cart uid={uid} currentUserRank={currentUserRank} />}
+            element={<Cart uid={session.uid} currentUserRank={currentUserRank} />}
           ></Route>
           <Route
             path="zaloguj"
@@ -108,16 +138,17 @@ function App() {
                 logout={logout}
                 accessCode={accessCode}
                 showWelocomeScreen={showWelocomeScreen}
-                onSetUid={setUid}
-                uid={uid}
-                currentEmail={currentEmail}
-                setCurrentEmail={setCurrentEmail}
+                onLogin={handleLogin}
+                uid={session.uid}
+                currentEmail={session.email}
               />
             }
           ></Route>
           <Route
             path="*"
-            element={<StoreOffer uid={uid} currentUserRank={currentUserRank} />}
+            element={
+              <StoreOffer uid={session.uid} currentUserRank={currentUserRank} />
+            }
           ></Route>
         </Route>
       </Routes>
