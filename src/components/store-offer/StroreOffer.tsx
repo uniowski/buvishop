@@ -1,7 +1,7 @@
 import "./StroreOffer.css";
 import But from "../store-offer-item/StoreItem";
 import { useState, useEffect } from "react";
-import { getAllShoes, type ShoeData } from "../../services/shopService";
+import { getAllShoes, type ShoeData } from "../../services/shoeService";
 
 type OfertaProps = {
   uid: string | null;

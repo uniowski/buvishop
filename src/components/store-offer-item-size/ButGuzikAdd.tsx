@@ -1,5 +1,5 @@
 import "./ButGuzikAdd.css";
-import { addShoeToCart } from "../../services/shopService";
+import { addShoeToCart } from "../../services/cartService";
 
 type ButGuzikAddProps = {
   size: number;

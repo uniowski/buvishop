@@ -5,7 +5,7 @@ import {
   loginWithEmailAndPassword,
   registerAccount,
   sendResetPasswordEmail,
-} from "../../services/shopService";
+} from "../../services/authService";
 
 type LoginFormValues = {
   email: string;

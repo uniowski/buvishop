@@ -1,6 +1,6 @@
 import "./AddShoe.css";
 import { useForm } from "react-hook-form";
-import { addNewShoeOffer } from "../../services/shopService";
+import { addNewShoeOffer } from "../../services/shoeService";
 
 type AddShoeFormValues = {
   shoeImage: FileList;

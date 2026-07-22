@@ -1,6 +1,6 @@
 import "./Main.css";
 import { useEffect, useState } from "react";
-import { getStoreStats } from "../../services/shopService";
+import { getStoreStats } from "../../services/storeService";
 
 function Main() {
   const [shoesCount, setShoesCount] = useState(0);

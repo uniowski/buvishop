@@ -1,5 +1,5 @@
 import "./CartItem.css";
-import { removeShoeFromCart } from "../../services/shopService";
+import { removeShoeFromCart } from "../../services/cartService";
 
 type CartItemProps = {
   id: string;

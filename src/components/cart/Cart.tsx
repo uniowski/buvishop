@@ -3,7 +3,7 @@ import "./Cart.css";
 import CartItem from "../cart-item/CartItem";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { getUserCartItems, type CartViewItem } from "../../services/shopService";
+import { getUserCartItems, type CartViewItem } from "../../services/cartService";
 
 type DeliveryFormValues = {
   delivery: number;
@@ -16,7 +16,7 @@ type CartProps = {
 
 function Cart({ uid, currentUserRank }: CartProps) {
   const [priceSum, setPriceSum] = useState(0);
-  const [dataToShow, setDataToShow] = useState<CartViewItem[] | undefined>();
+  const [dataToShow, setDataToShow] = useState<CartViewItem[] | null>(null);
   const { register, watch } = useForm<DeliveryFormValues>({
     defaultValues: { delivery: 9.9 },
   });
@@ -33,7 +33,7 @@ function Cart({ uid, currentUserRank }: CartProps) {
 
   async function fetchAndDisplayUsersCart() {
     if (!uid) {
-      setDataToShow(undefined);
+      setDataToShow(null);
       return;
     }
 
@@ -44,7 +44,7 @@ function Cart({ uid, currentUserRank }: CartProps) {
         setDataToShow(cartData);
         calculatePriceSum(cartData);
       } else {
-        setDataToShow();
+        setDataToShow(null);
       }
     } catch (error) {
       console.error("Błąd przy pobieraniu dokumentów: ", error);
@@ -90,7 +90,6 @@ function Cart({ uid, currentUserRank }: CartProps) {
           <h5>Dostawa: {cenaDostawy.toFixed(2)} PLN</h5>
           <select
             id="dostawa"
-            name="dostawa"
             className="form-select"
             {...register("delivery", { valueAsNumber: true })}
           >

@@ -1,6 +1,6 @@
 import "./StoreItem.css";
 import ButGuzikAdd from "../store-offer-item-size/ButGuzikAdd";
-import { removeShoeOffer, type ShoeData } from "../../services/shopService";
+import { removeShoeOffer, type ShoeData } from "../../services/shoeService";
 
 type StoreItemProps = {
   shoeData: ShoeData;
