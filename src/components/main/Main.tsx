@@ -1,7 +1,6 @@
 import "./Main.css";
-import { collection, getCountFromServer } from "firebase/firestore";
-import { firestore } from "../../firebaseConfig";
 import { useEffect, useState } from "react";
+import { getStoreStats } from "../../services/shopService";
 
 function Main() {
   const [shoesCount, setShoesCount] = useState(0);
@@ -9,13 +8,9 @@ function Main() {
 
   async function getTotalCount() {
     try {
-      const collShoes = collection(firestore, "shoes");
-      const snapshotShoes = await getCountFromServer(collShoes);
-      setShoesCount(snapshotShoes.data().count);
-
-      const collUsers = collection(firestore, "users");
-      const snapshotUsers = await getCountFromServer(collUsers);
-      setUsersCount(snapshotUsers.data().count);
+      const stats = await getStoreStats();
+      setShoesCount(stats.shoesCount);
+      setUsersCount(stats.usersCount);
     } catch {
       console.log("error");
     }

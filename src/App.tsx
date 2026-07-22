@@ -1,6 +1,5 @@
 import "./bootstrap.css";
 import "./App.css";
-// import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StoreOffer from "./components/store-offer/StroreOffer";
@@ -10,11 +9,14 @@ import LoginPage from "./components/login-page/LoginPage";
 import Contact from "./components/contact/Contact";
 import Cart from "./components/cart/Cart";
 import AddShoe from "./components/add-shoe/AddShoe";
-import { getDoc, doc } from "firebase/firestore";
-import { firestore } from "./firebaseConfig";
+import { getUserProfile } from "./services/shopService";
 
 function App() {
-  const accessCode = "1234";
+  const accessCode = import.meta.env.VITE_ADMIN_ACCESS_CODE;
+
+  if (!accessCode) {
+    throw new Error("Missing required environment variable: VITE_ADMIN_ACCESS_CODE");
+  }
 
   const [userStatus, setUserStatus] = useState("");
   const [currentUserRank, setCurrentUserRank] = useState<string | null>(null);
@@ -27,22 +29,14 @@ function App() {
     if (uid) {
       const ttload = async () => {
         try {
-          const docRef = doc(firestore, "users", uid);
-          const docSnap = await getDoc(docRef);
+          const userProfile = await getUserProfile(uid);
 
-          if (docSnap.exists()) {
+          if (userProfile) {
             const welcomeSentence =
-              "Witaj " +
-              docSnap.data().firstName +
-              " " +
-              docSnap.data().lastName;
+              "Witaj " + userProfile.firstName + " " + userProfile.lastName;
 
             setUserStatus(
-              docSnap.data().rank +
-                ": " +
-                docSnap.data().firstName +
-                " " +
-                docSnap.data().lastName
+              userProfile.rank + ": " + userProfile.firstName + " " + userProfile.lastName
             );
             const letters = welcomeSentence
               .split(" ")
@@ -64,11 +58,7 @@ function App() {
               </div>
             );
 
-            const userSnap = await getDoc(doc(firestore, "users", uid));
-            if (userSnap.exists()) {
-              const userRank = userSnap.data().rank;
-              setCurrentUserRank(typeof userRank === "string" ? userRank : null);
-            }
+            setCurrentUserRank(userProfile.rank || null);
 
             setTimeout(() => {
               setWelocomeScreen(undefined);

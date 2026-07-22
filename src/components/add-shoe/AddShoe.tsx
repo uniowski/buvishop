@@ -1,8 +1,6 @@
 import "./AddShoe.css";
-import { addDoc, collection } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { firestore } from "../../firebaseConfig";
 import { useForm } from "react-hook-form";
+import { addNewShoeOffer } from "../../services/shopService";
 
 type AddShoeFormValues = {
   shoeImage: FileList;
@@ -28,24 +26,17 @@ function AddShoe() {
       return;
     }
 
-    const storage = getStorage();
-
     try {
-      const storageRef = ref(storage, `shoes/${shoeImage.name}`);
-      await uploadBytes(storageRef, shoeImage);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      const colRef = collection(firestore, "shoes");
-      const docRef = await addDoc(colRef, {
+      const newDocId = await addNewShoeOffer({
+        shoeImage,
         brand: data.brand,
         model: data.model,
         size: availableSize,
         fabric: data.fabric,
         price: data.price,
-        imageLink: downloadURL,
       });
 
-      console.log("ID nowo dodanego dokumentu: ", docRef.id);
+      console.log("ID nowo dodanego dokumentu: ", newDocId);
     } catch (error) {
       console.error("Błąd przy dodawaniu dokumentu: ", error);
       alert("Wystąpił błąd przy dodawaniu butów.");

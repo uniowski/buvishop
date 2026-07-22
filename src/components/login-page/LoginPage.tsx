@@ -1,13 +1,11 @@
 import "./LoginPage.css";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
-import { auth, firestore } from "../../firebaseConfig";
 import { useEffect, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
+import {
+  loginWithEmailAndPassword,
+  registerAccount,
+  sendResetPasswordEmail,
+} from "../../services/shopService";
 
 type LoginFormValues = {
   email: string;
@@ -79,14 +77,9 @@ function LoginPage({
 
   const loginToAccount = async (data: LoginFormValues) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
-      const user = userCredential.user;
+      const user = await loginWithEmailAndPassword(data.email, data.password);
       onSetUid(user.uid);
-      setCurrentEmail(user.email);
+      setCurrentEmail(user.email ?? "");
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Błąd logowania:", errorMessage);
@@ -103,18 +96,12 @@ function LoginPage({
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        registerEmail,
-        registerPassword
-      );
-      const user = userCredential.user;
-
-      await setDoc(doc(firestore, "users", user.uid), {
-        email: data.email,
+      await registerAccount({
         firstName: data.firstName,
+        email: data.email,
         lastName: data.lastName,
         rank: data.rank,
+        password: data.password,
       });
 
       window.scroll({
@@ -158,7 +145,7 @@ function LoginPage({
 
     if (loginEmail.includes("@") && loginEmail.includes(".")) {
       try {
-        await sendPasswordResetEmail(auth, loginEmail);
+        await sendResetPasswordEmail(loginEmail);
         setResetPasswordButton("Wysłano maila, sprawdź pocztę: " + loginEmail);
       } catch (error) {
         console.log("Nie można wysłać maila do odzyskania hasła:");

@@ -1,17 +1,6 @@
 import "./StoreItem.css";
 import ButGuzikAdd from "../store-offer-item-size/ButGuzikAdd";
-import { deleteDoc, doc } from "firebase/firestore";
-import { firestore } from "../../firebaseConfig";
-
-type ShoeData = {
-  id: string;
-  brand: string;
-  model: string;
-  size: number[];
-  fabric: string;
-  price: string;
-  imageLink: string;
-};
+import { removeShoeOffer, type ShoeData } from "../../services/shopService";
 
 type StoreItemProps = {
   shoeData: ShoeData;
@@ -45,7 +34,7 @@ function But({
       return;
     }
 
-    await deleteDoc(doc(firestore, "shoes", shoeData.id));
+    await removeShoeOffer(shoeData.id);
     fetchAndDisplayAllDocuments();
   };
 
